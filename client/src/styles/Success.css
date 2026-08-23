@@ -1,0 +1,147 @@
+.success-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  color: #fff;
+}
+
+.success-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.success-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.success-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+.success-content {
+  max-width: 600px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.success-icon {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.success-content h1 {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+}
+
+.success-greeting {
+  font-size: 1.2rem;
+  margin-bottom: 32px;
+  color: var(--color-accent);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.success-details {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 24px;
+  border-radius: var(--border-radius);
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item span {
+  opacity: 0.7;
+}
+
+.detail-item strong {
+  font-weight: 500;
+}
+
+/* Camera Shutter Animation */
+.shutter-top, .shutter-bottom {
+  position: fixed;
+  left: 0;
+  width: 100vw;
+  height: 50vh;
+  background-color: #0a0a0a;
+  z-index: 9998;
+  pointer-events: none;
+}
+
+.shutter-top {
+  top: 0;
+  transform: translateY(-100%);
+  animation: shutterTop 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+}
+
+.shutter-bottom {
+  bottom: 0;
+  transform: translateY(100%);
+  animation: shutterBottom 1.5s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+}
+
+@keyframes shutterTop {
+  0% { transform: translateY(-100%); }
+  25% { transform: translateY(0); }
+  35% { transform: translateY(0); }
+  100% { transform: translateY(-100%); }
+}
+
+@keyframes shutterBottom {
+  0% { transform: translateY(100%); }
+  25% { transform: translateY(0); }
+  35% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+
+.camera-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #ffffff;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  animation: flashAnim 1.5s forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes flashAnim {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  100% { opacity: 0; }
+}
