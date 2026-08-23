@@ -48,7 +48,7 @@ const uploadPaymentQr = async (req, res) => {
     }
 
     if (req.file) {
-      settings.paymentQrUrl = '/uploads/' + req.file.filename;
+      settings.paymentQrUrl = req.file.path;
       await settings.save();
       res.json(settings);
     } else {

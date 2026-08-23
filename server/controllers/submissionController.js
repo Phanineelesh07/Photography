@@ -28,10 +28,8 @@ const uploadSubmission = async (req, res) => {
       return res.status(400).json({ message: `The theme "${user.selectedTheme}" has already reached its maximum limit of 25 submissions.` });
     }
 
-    // Server URL logic (adjust depending on deployment)
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+    // With Cloudinary, the full URL is automatically provided in req.file.path
+    const imageUrl = req.file.path;
 
     const submission = await Submission.create({
       participant: req.user._id,
