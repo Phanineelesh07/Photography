@@ -1,12 +1,62 @@
 const User = require('../models/User');
+const OTP = require('../models/OTP');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const nodemailer = require('nodemailer');
 
 // Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d'
   });
+};
+
+// Transporter for nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// @desc    Send OTP to email
+// @route   POST /api/auth/send-otp
+// @access  Public
+const sendOtp = async (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  try {
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Check if OTP already exists for this email, delete it
+    await OTP.deleteOne({ email });
+
+    // Save new OTP
+    await OTP.create({
+      email,
+      otp
+    });
+
+    // Send email
+    const mailOptions = {
+      from: `"Inspire Registration" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Your Registration OTP - Inspire Event',
+      text: `Your OTP for Inspire Event Registration is: ${otp}. It is valid for 10 minutes.`
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Error sending OTP. Please check email credentials in environment variables.' });
+  }
 };
 
 // @desc    Register new user
@@ -18,9 +68,19 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name, rollNumber, phone, course, branch, year, email, password, selectedTheme, userType } = req.body;
+  const { name, rollNumber, phone, course, branch, year, email, password, selectedTheme, userType, otp } = req.body;
+
+  if (!otp) {
+    return res.status(400).json({ message: 'Please provide the OTP sent to your email.' });
+  }
 
   try {
+    // Verify OTP
+    const validOtp = await OTP.findOne({ email, otp });
+    if (!validOtp) {
+      return res.status(400).json({ message: 'Invalid or expired OTP.' });
+    }
+
     // Check if user exists by email or rollNumber
     const query = [{ email }];
     if (rollNumber) query.push({ rollNumber });
@@ -37,7 +97,7 @@ const registerUser = async (req, res) => {
     // Create user
     const user = await User.create({
       name,
-      rollNumber: role === 'participant' ? rollNumber : undefined,
+      rollNumber, // Now we collect roll number for EVERYONE (except admin)
       phone,
       course: role === 'participant' ? course : undefined,
       branch: role === 'participant' && course === 'B.Tech' ? branch : (role === 'participant' ? 'Other' : undefined),
@@ -50,6 +110,9 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      // Delete OTP after successful registration
+      await OTP.deleteOne({ email });
+
       res.status(201).json({
         _id: user.id,
         name: user.name,
@@ -124,6 +187,7 @@ const getMe = async (req, res) => {
 };
 
 module.exports = {
+  sendOtp,
   registerUser,
   loginUser,
   getMe

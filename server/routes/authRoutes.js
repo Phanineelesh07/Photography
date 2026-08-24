@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
-const { registerUser, loginUser, getMe } = require('../controllers/authController');
+const { registerUser, loginUser, getMe, sendOtp } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
+
+router.post('/send-otp', [
+  check('email', 'Please include a valid email').isEmail()
+], sendOtp);
 
 router.post('/register', [
   check('name', 'Name is required').not().isEmpty(),

@@ -44,11 +44,14 @@ const Register = () => {
     year: '',
     email: '',
     password: '',
+    otp: '',
     selectedTheme: '',
     userType: 'participant'
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [paymentQrUrl, setPaymentQrUrl] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -88,9 +91,39 @@ const Register = () => {
     });
   };
 
+  const handleSendOtp = async () => {
+    if (!formData.email) {
+      setError('Please enter your email first.');
+      return;
+    }
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    setSendingOtp(true);
+    setError('');
+    try {
+      const { sendOtp } = await import('../services/authService');
+      await sendOtp(formData.email);
+      setOtpSent(true);
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Failed to send OTP. Please try again.');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.otp) {
+      setError('Please enter the OTP sent to your email.');
+      return;
+    }
 
     if (formData.userType === 'participant' && !formData.selectedTheme) {
       setError('Please select a photography theme.');
@@ -179,11 +212,30 @@ const Register = () => {
               <label>Phone Number</label>
               <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+91 9876543210" required />
             </div>
-            <div className="form-group">
+            <div className="form-group" style={{ position: 'relative' }}>
               <label>Email Address</label>
-              <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="student@college.edu" required />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="student@college.edu" required disabled={otpSent} style={{ flex: 1 }} />
+                {!otpSent ? (
+                  <button type="button" onClick={handleSendOtp} className="portal-btn" style={{ padding: '0 15px', whiteSpace: 'nowrap' }} disabled={sendingOtp || !formData.email}>
+                    {sendingOtp ? 'Sending...' : 'Send OTP'}
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => setOtpSent(false)} className="portal-btn" style={{ padding: '0 15px', background: 'transparent', border: '1px solid var(--color-primary)', color: 'var(--color-primary)' }}>
+                    Change
+                  </button>
+                )}
+              </div>
             </div>
           </div>
+
+          {otpSent && (
+            <div className="form-group">
+              <label>Enter Email OTP</label>
+              <input type="text" name="otp" value={formData.otp} onChange={handleChange} placeholder="6-digit code" required />
+              <small style={{ color: '#2ecc71', marginTop: '5px', display: 'block' }}>OTP sent to {formData.email}</small>
+            </div>
+          )}
 
           {formData.userType === 'participant' && (
             <div className="form-row">
@@ -332,7 +384,7 @@ const Register = () => {
           <button 
             type="submit" 
             className="btn-submit" 
-            disabled={loading || (formData.userType === 'participant' && !formData.selectedTheme) || (formData.userType === 'participant' && !paymentQrUrl)}
+            disabled={loading || !otpSent || (formData.userType === 'participant' && !formData.selectedTheme) || (formData.userType === 'participant' && !paymentQrUrl)}
           >
             {loading ? 'Registering...' : 'Complete Registration'}
           </button>

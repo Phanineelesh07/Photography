@@ -13,3 +13,10 @@ export const login = async (credentials) => {
     body: JSON.stringify(credentials),
   });
 };
+
+export const sendOtp = async (email) => {
+  return await fetchWithAuth('/auth/send-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+};
