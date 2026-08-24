@@ -168,12 +168,10 @@ const Register = () => {
               <label>Full Name</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" required />
             </div>
-            {formData.userType === 'participant' && (
-              <div className="form-group">
-                <label>Roll Number</label>
-                <input type="text" name="rollNumber" value={formData.rollNumber} onChange={handleChange} placeholder="e.g. 21CS101" required />
-              </div>
-            )}
+            <div className="form-group">
+              <label>Roll Number</label>
+              <input type="text" name="rollNumber" value={formData.rollNumber} onChange={handleChange} placeholder="e.g. 21CS101" required />
+            </div>
           </div>
 
           <div className="form-row">

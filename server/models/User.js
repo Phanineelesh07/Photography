@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema({
   },
   rollNumber: {
     type: String,
-    required: [function() { return this.role === 'participant'; }, 'Please add a roll number'],
+    required: [function() { return this.role !== 'admin'; }, 'Please add a roll number'],
     unique: true,
     sparse: true
   },
