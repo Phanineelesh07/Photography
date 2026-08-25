@@ -11,14 +11,7 @@ const generateToken = (id) => {
   });
 };
 
-// Transporter for nodemailer
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+
 
 // @desc    Send OTP to email
 // @route   POST /api/auth/send-otp
@@ -51,6 +44,14 @@ const sendOtp = async (req, res) => {
       otp
     });
 
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
     // Send email
     const mailOptions = {
       from: `"Inspire Registration" <${process.env.EMAIL_USER}>`,
@@ -63,7 +64,7 @@ const sendOtp = async (req, res) => {
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
     console.error('Error sending OTP:', error);
-    res.status(500).json({ message: 'Error sending OTP. Please check email credentials in environment variables.' });
+    res.status(500).json({ message: `Error sending OTP: ${error.message}` });
   }
 };
 
