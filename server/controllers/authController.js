@@ -56,7 +56,7 @@ const sendOtp = async (req, res) => {
 
     // Send email
     const mailOptions = {
-      from: `"Inspire Registration" <${process.env.EMAIL_USER}>`,
+      from: `"Inspire Registration" <filmandphotographyclubau@gmail.com>`,
       to: email,
       subject: 'Your Registration OTP - Inspire Event',
       text: `Your OTP for Inspire Event Registration is: ${otp}. It is valid for 10 minutes.`
