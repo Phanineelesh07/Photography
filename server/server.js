@@ -18,6 +18,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy for Render deployment (fixes rate-limit errors)
+app.set('trust proxy', 1);
+
 // Enable CORS (Top priority)
 app.use(cors());
 
