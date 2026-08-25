@@ -1,8 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff } from 'lucide-react';
-import { Check } from 'lucide-react';
+import { Eye, EyeOff, Check } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { register as registerService } from '../services/authService';
 import '../styles/Auth.css';
@@ -44,19 +43,19 @@ const Register = () => {
     year: '',
     email: '',
     password: '',
-    otp: '',
     selectedTheme: '',
-    userType: 'participant'
+    userType: 'participant',
+    otp: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sendingOtp, setSendingOtp] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [paymentQrUrl, setPaymentQrUrl] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [step, setStep] = useState(1);
+  const [otpSentMsg, setOtpSentMsg] = useState('');
+
   const getBaseUrl = () => { const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'; return apiUrl.replace('/api', ''); };
-  
   
   useEffect(() => {
     const fetchSettings = async () => {
@@ -91,42 +90,49 @@ const Register = () => {
     });
   };
 
-  const handleSendOtp = async () => {
-    if (!formData.email) {
-      setError('Please enter your email first.');
-      return;
-    }
-    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address.');
+  const handleSendOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    setOtpSentMsg('');
+
+    if (formData.userType === 'participant' && !formData.selectedTheme) {
+      setError('Please select a photography theme.');
       return;
     }
 
-    setSendingOtp(true);
-    setError('');
+    setLoading(true);
+
     try {
-      const { sendOtp } = await import('../services/authService');
-      await sendOtp(formData.email);
-      setOtpSent(true);
-      setError('');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${API_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send OTP');
+      }
+
+      setOtpSentMsg('OTP sent to your college email!');
+      setStep(2);
     } catch (err) {
-      setError(err.message || 'Failed to send OTP. Please try again.');
+      setError(err.message || 'Error sending OTP.');
     } finally {
-      setSendingOtp(false);
+      setLoading(false);
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (!formData.otp) {
       setError('Please enter the OTP sent to your email.');
-      return;
-    }
-
-    if (formData.userType === 'participant' && !formData.selectedTheme) {
-      setError('Please select a photography theme.');
       return;
     }
 
@@ -189,206 +195,224 @@ const Register = () => {
         </div>
 
         {error && <div className="auth-error">{error}</div>}
+        {otpSentMsg && <div className="auth-error" style={{backgroundColor: 'rgba(46, 204, 113, 0.1)', color: '#2ecc71', border: '1px solid rgba(46, 204, 113, 0.3)'}}>{otpSentMsg}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="portal-toggle">
-            <button type="button" className={`portal-btn ${formData.userType === 'participant' ? 'active' : ''}`} onClick={() => setFormData({...formData, userType: 'participant'})}>Contestant</button>
-            <button type="button" className={`portal-btn ${formData.userType === 'viewer' ? 'active' : ''}`} onClick={() => setFormData({...formData, userType: 'viewer'})}>Viewer</button>
-          </div>
+        {step === 1 ? (
+          <form onSubmit={handleSendOtp} className="auth-form">
+            <div className="portal-toggle">
+              <button type="button" className={`portal-btn ${formData.userType === 'participant' ? 'active' : ''}`} onClick={() => setFormData({...formData, userType: 'participant'})}>Contestant</button>
+              <button type="button" className={`portal-btn ${formData.userType === 'viewer' ? 'active' : ''}`} onClick={() => setFormData({...formData, userType: 'viewer'})}>Viewer</button>
+            </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label>Full Name</label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" required />
-            </div>
-            <div className="form-group">
-              <label>Roll Number</label>
-              <input type="text" name="rollNumber" value={formData.rollNumber} onChange={handleChange} placeholder="e.g. 21CS101" required />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Phone Number</label>
-              <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+91 9876543210" required />
-            </div>
-            <div className="form-group" style={{ position: 'relative' }}>
-              <label>Email Address</label>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="student@college.edu" required disabled={otpSent} style={{ flex: 1 }} />
-                {!otpSent ? (
-                  <button type="button" onClick={handleSendOtp} className="portal-btn" style={{ padding: '0 15px', whiteSpace: 'nowrap' }} disabled={sendingOtp || !formData.email}>
-                    {sendingOtp ? 'Sending...' : 'Send OTP'}
-                  </button>
-                ) : (
-                  <button type="button" onClick={() => setOtpSent(false)} className="portal-btn" style={{ padding: '0 15px', background: 'transparent', border: '1px solid var(--color-primary)', color: 'var(--color-primary)' }}>
-                    Change
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {otpSent && (
-            <div className="form-group">
-              <label>Enter Email OTP</label>
-              <input type="text" name="otp" value={formData.otp} onChange={handleChange} placeholder="6-digit code" required />
-              <small style={{ color: '#2ecc71', marginTop: '5px', display: 'block' }}>OTP sent to {formData.email}</small>
-            </div>
-          )}
-
-          {formData.userType === 'participant' && (
             <div className="form-row">
               <div className="form-group">
-                <label>Select Course/Program</label>
-                <select 
-                  name="course" 
-                  value={formData.course} 
-                  onChange={handleChange} 
-                  required
-                >
-                  <option value="">Select Course</option>
-                  <option value="B.Tech">B.Tech</option>
-                  <option value="BBA">BBA</option>
-                  <option value="Pharmacy">Pharmacy</option>
-                  <option value="Polytechnic">Polytechnic</option>
-                  <option value="Other">Other</option>
-                </select>
+                <label>Full Name</label>
+                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" required />
               </div>
+              <div className="form-group">
+                <label>Roll Number</label>
+                <input type="text" name="rollNumber" value={formData.rollNumber} onChange={handleChange} placeholder="e.g. 21CS101" required />
+              </div>
+            </div>
 
-              {formData.course === 'B.Tech' && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Phone Number</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+91 9876543210" required />
+              </div>
+              <div className="form-group">
+                <label>College Email (@adityauniversity.in)</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="rollnumber@adityauniversity.in" required />
+              </div>
+            </div>
+
+            {formData.userType === 'participant' && (
+              <div className="form-row">
                 <div className="form-group">
-                  <label>Select Branch</label>
+                  <label>Select Course/Program</label>
                   <select 
-                    name="branch" 
-                    value={formData.branch} 
+                    name="course" 
+                    value={formData.course} 
                     onChange={handleChange} 
                     required
                   >
-                    <option value="">Select Branch</option>
-                    <option value="CSE">CSE</option>
-                    <option value="ECE">ECE</option>
-                    <option value="EEE">EEE</option>
-                    <option value="MECH">MECH</option>
-                    <option value="CIVIL">CIVIL</option>
-                    <option value="AI & DS">AI & DS</option>
-                    <option value="AIML">AIML</option>
-                    <option value="IT">IT</option>
-                    <option value="Petroleum">Petroleum</option>
-                    <option value="Mining">Mining</option>
+                    <option value="">Select Course</option>
+                    <option value="B.Tech">B.Tech</option>
+                    <option value="BBA">BBA</option>
+                    <option value="Pharmacy">Pharmacy</option>
+                    <option value="Polytechnic">Polytechnic</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
-              )}
-              <div className="form-group">
-                <label>Year</label>
-                <select name="year" value={formData.year} onChange={handleChange} required>
-                  <option value="">Select Year</option>
-                  <option value="1st Year">1st Year</option>
-                  <option value="2nd Year">2nd Year</option>
-                  <option value="3rd Year">3rd Year</option>
-                  <option value="4th Year">4th Year</option>
-                </select>
-              </div>
-            </div>
-          )}
 
-          <div className="form-group" style={{ position: 'relative' }}>
-            <label>Password (for dashboard access)</label>
-            <input 
-              type={showPassword ? 'text' : 'password'} 
-              name="password" 
-              value={formData.password} 
-              onChange={handleChange} 
-              placeholder="Create a password (min 6 chars)" 
-              minLength="6" 
-              required 
-              style={{ paddingRight: '45px' }}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: 'absolute',
-                right: '12px',
-                top: '38px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--color-text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '5px'
-              }}
-            >
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={showPassword ? 'hide' : 'show'}
-                  initial={{ opacity: 0, scale: 0.8, rotate: -45 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, rotate: 45 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </motion.div>
-              </AnimatePresence>
-            </button>
-          </div>
-
-          {formData.userType === 'participant' && (
-            <div className="theme-selection">
-              <h3>Select Your Photography Theme</h3>
-              <p className="mb-2" style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>You can only select one theme. Choose wisely.</p>
-              
-              <div className="theme-grid">
-                {THEMES.map((theme) => (
-                  <div 
-                    key={theme.id}
-                    className={`theme-card ${formData.selectedTheme === theme.id ? 'selected' : ''}`}
-                    onClick={() => handleThemeSelect(theme.id)}
-                  >
-                    <img src={theme.image} alt={theme.title} />
-                    <div className="theme-card-overlay">
-                      <h4>{theme.title}</h4>
-                      <p>{theme.description}</p>
-                    </div>
-                    <div className="theme-check">
-                      <Check size={18} />
-                    </div>
+                {formData.course === 'B.Tech' && (
+                  <div className="form-group">
+                    <label>Select Branch</label>
+                    <select 
+                      name="branch" 
+                      value={formData.branch} 
+                      onChange={handleChange} 
+                      required
+                    >
+                      <option value="">Select Branch</option>
+                      <option value="CSE">CSE</option>
+                      <option value="ECE">ECE</option>
+                      <option value="EEE">EEE</option>
+                      <option value="MECH">MECH</option>
+                      <option value="CIVIL">CIVIL</option>
+                      <option value="AI & DS">AI & DS</option>
+                      <option value="AIML">AIML</option>
+                      <option value="IT">IT</option>
+                      <option value="Petroleum">Petroleum</option>
+                      <option value="Mining">Mining</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
-                ))}
+                )}
+                <div className="form-group">
+                  <label>Year</label>
+                  <select name="year" value={formData.year} onChange={handleChange} required>
+                    <option value="">Select Year</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                  </select>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          
-{formData.userType === 'participant' && paymentQrUrl && (
-            <div className="payment-section" style={{ margin: '20px 0', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <h3 style={{ marginBottom: '15px', color: 'var(--color-primary)' }}>Registration Payment</h3>
-              <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Please scan the QR code below to complete your registration payment.</p>
-              <img src={paymentQrUrl.startsWith('http') ? paymentQrUrl : getBaseUrl() + paymentQrUrl} alt="Payment QR Code" style={{ width: '100%', maxWidth: '350px', borderRadius: '8px', border: '2px solid #fff', marginBottom: '15px' }} />
-              <h4 style={{ color: '#2ecc71', fontSize: '1.3rem', margin: '15px 0' }}>Registration Fee: Rs : 49/- only..!!</h4>
-              <p style={{ fontSize: '0.85rem', color: '#ff9800' }}>Note: After payment, submit the application. Admin will verify and approve your account.</p>
+            <div className="form-group" style={{ position: 'relative' }}>
+              <label>Password (for dashboard access)</label>
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                name="password" 
+                value={formData.password} 
+                onChange={handleChange} 
+                placeholder="Create a password (min 6 chars)" 
+                minLength="6" 
+                required 
+                style={{ paddingRight: '45px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '38px',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--color-text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '5px'
+                }}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={showPassword ? 'hide' : 'show'}
+                    initial={{ opacity: 0, scale: 0.8, rotate: -45 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, rotate: 45 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </motion.div>
+                </AnimatePresence>
+              </button>
             </div>
-          )}
 
-          {formData.userType === 'participant' && !paymentQrUrl && (
-            <div className="payment-section" style={{ margin: '20px 0', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <h3 style={{ marginBottom: '15px', color: '#f39c12' }}>Payment Section</h3>
-              <p style={{ fontSize: '1.1rem', color: '#ccc' }}>Will update soon. Stay tuned!</p>
-              <p style={{ fontSize: '0.9rem', marginTop: '10px', color: 'var(--color-text-secondary)' }}>Registrations are temporarily paused until the payment details are provided.</p>
+            {formData.userType === 'participant' && (
+              <div className="theme-selection">
+                <h3>Select Your Photography Theme</h3>
+                <p className="mb-2" style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>You can only select one theme. Choose wisely.</p>
+                
+                <div className="theme-grid">
+                  {THEMES.map((theme) => (
+                    <div 
+                      key={theme.id}
+                      className={`theme-card ${formData.selectedTheme === theme.id ? 'selected' : ''}`}
+                      onClick={() => handleThemeSelect(theme.id)}
+                    >
+                      <img src={theme.image} alt={theme.title} />
+                      <div className="theme-card-overlay">
+                        <h4>{theme.title}</h4>
+                        <p>{theme.description}</p>
+                      </div>
+                      <div className="theme-check">
+                        <Check size={18} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {formData.userType === 'participant' && paymentQrUrl && (
+              <div className="payment-section" style={{ margin: '20px 0', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <h3 style={{ marginBottom: '15px', color: 'var(--color-primary)' }}>Registration Payment</h3>
+                <p style={{ marginBottom: '15px', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>Please scan the QR code below to complete your registration payment.</p>
+                <img src={paymentQrUrl.startsWith('http') ? paymentQrUrl : getBaseUrl() + paymentQrUrl} alt="Payment QR Code" style={{ width: '100%', maxWidth: '350px', borderRadius: '8px', border: '2px solid #fff', marginBottom: '15px' }} />
+                <h4 style={{ color: '#2ecc71', fontSize: '1.3rem', margin: '15px 0' }}>Registration Fee: Rs : 49/- only..!!</h4>
+                <p style={{ fontSize: '0.85rem', color: '#ff9800' }}>Note: After payment, submit the application. Admin will verify and approve your account.</p>
+              </div>
+            )}
+
+            {formData.userType === 'participant' && !paymentQrUrl && (
+              <div className="payment-section" style={{ margin: '20px 0', padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <h3 style={{ marginBottom: '15px', color: '#f39c12' }}>Payment Section</h3>
+                <p style={{ fontSize: '1.1rem', color: '#ccc' }}>Will update soon. Stay tuned!</p>
+                <p style={{ fontSize: '0.9rem', marginTop: '10px', color: 'var(--color-text-secondary)' }}>Registrations are temporarily paused until the payment details are provided.</p>
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              className="btn-submit" 
+              disabled={loading || (formData.userType === 'participant' && !formData.selectedTheme) || (formData.userType === 'participant' && !paymentQrUrl)}
+            >
+              {loading ? 'Sending OTP...' : 'Send OTP to Email'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleRegisterSubmit} className="auth-form">
+            <div className="form-group">
+              <label>Enter 6-Digit OTP</label>
+              <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '10px' }}>
+                We sent a verification code to <strong>{formData.email}</strong>. Please check your inbox (and spam folder).
+              </p>
+              <input 
+                type="text" 
+                name="otp" 
+                value={formData.otp} 
+                onChange={handleChange} 
+                placeholder="123456" 
+                required 
+                maxLength="6"
+                style={{ letterSpacing: '2px', textAlign: 'center', fontSize: '1.2rem' }}
+              />
             </div>
-          )}
-
-          <button 
-            type="submit" 
-            className="btn-submit" 
-            disabled={loading || !otpSent || (formData.userType === 'participant' && !formData.selectedTheme) || (formData.userType === 'participant' && !paymentQrUrl)}
-          >
-            {loading ? 'Registering...' : 'Complete Registration'}
-          </button>
-        </form>
+            
+            <button 
+              type="submit" 
+              className="btn-submit" 
+              disabled={loading || !formData.otp}
+            >
+              {loading ? 'Verifying...' : 'Verify OTP & Complete Registration'}
+            </button>
+            
+            <button 
+              type="button" 
+              onClick={() => {setStep(1); setOtpSentMsg('');}}
+              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', width: '100%', padding: '12px', borderRadius: '8px', color: '#fff', marginTop: '10px', cursor: 'pointer' }}
+            >
+              Back to form
+            </button>
+          </form>
+        )}
 
         <div className="auth-footer">
           <p>Already registered? <Link to="/login">Login here</Link></p>

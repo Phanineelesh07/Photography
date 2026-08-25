@@ -29,6 +29,14 @@ const sendOtp = async (req, res) => {
   if (!email) {
     return res.status(400).json({ message: 'Email is required' });
   }
+  
+  if (email.toLowerCase() !== 'admin@inspire.com') {
+    const allowedDomains = ['@adityauniversity.in', '@aditya.ac.in'];
+    const isAllowed = allowedDomains.some(domain => email.toLowerCase().endsWith(domain));
+    if (!isAllowed) {
+      return res.status(400).json({ message: 'Only official college emails (@adityauniversity.in or @aditya.ac.in) are allowed.' });
+    }
+  }
 
   try {
     // Generate a 6-digit OTP
