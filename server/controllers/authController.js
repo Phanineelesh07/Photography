@@ -44,25 +44,32 @@ const sendOtp = async (req, res) => {
       otp
     });
 
-    const transporter = nodemailer.createTransport({
-      host: 'smtp-relay.brevo.com',
-      port: 2525,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
+    // Send email using Brevo REST API
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'api-key': process.env.EMAIL_PASS // We will use EMAIL_PASS to store the API Key
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "Inspire Registration",
+          email: "filmandphotographyclubau@gmail.com"
+        },
+        to: [
+          { email: email }
+        ],
+        subject: "Your Registration OTP - Inspire Event",
+        htmlContent: `<html><body><p>Your OTP for Inspire Event Registration is: <strong>${otp}</strong>.</p><p>It is valid for 10 minutes.</p></body></html>`
+      })
     });
 
-    // Send email
-    const mailOptions = {
-      from: `"Inspire Registration" <filmandphotographyclubau@gmail.com>`,
-      to: email,
-      subject: 'Your Registration OTP - Inspire Event',
-      text: `Your OTP for Inspire Event Registration is: ${otp}. It is valid for 10 minutes.`
-    };
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to send via Brevo API');
+    }
 
-    await transporter.sendMail(mailOptions);
     res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
     console.error('Error sending OTP:', error);
