@@ -1,0 +1,1 @@
+fetch("https://photography-backend-drng.onrender.com/api/auth/send-otp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: "test@adityauniversity.in" }) }).then(r => r.text()).then(t => { console.log(t); process.exit(0); }).catch(e => { console.error(e); process.exit(1); });

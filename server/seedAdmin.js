@@ -7,7 +7,7 @@ const seedAdmin = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
     
     // Check if admin already exists
-    const adminExists = await User.findOne({ email: 'admin@inspire.com' });
+    const adminExists = await User.findOne({ email: 'admin@prespecta.com' });
     if (adminExists) {
       console.log('Admin already exists!');
       process.exit();
@@ -19,13 +19,13 @@ const seedAdmin = async () => {
       phone: '0000000000',
       branch: 'Other',
       year: '4th Year',
-      email: 'admin@inspire.com',
+      email: 'admin@prespecta.com',
       password: 'AdminPassword123!',
       selectedTheme: 'Nature & Greenery',
       role: 'admin'
     });
 
-    console.log('Admin created successfully with email: admin@inspire.com');
+    console.log('Admin created successfully with email: admin@prespecta.com');
     process.exit();
   } catch (error) {
     console.error(`Error: ${error.message}`);

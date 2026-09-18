@@ -62,7 +62,7 @@ const Footer = () => {
       <div className="footer-bottom">
         <div className="container bottom-content" style={{ justifyContent: 'center' }}>
           <div className="copyright">
-            &copy; Copyright {new Date().getFullYear()} - Film and photography club - Aditya University . All Rights Reserved. <span className="dev-credit">� Website Designed for Inspire Event</span>
+            &copy; Copyright {new Date().getFullYear()} - Film and photography club - Aditya University . All Rights Reserved. <span className="dev-credit">� Website Designed for Prespecta Event</span>
           </div>
         </div>
       </div>

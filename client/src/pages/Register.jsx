@@ -191,7 +191,7 @@ const Register = () => {
       >
         <div className="auth-header">
           <h2>Participant Registration</h2>
-          <p>Join the Inspire photography event.</p>
+          <p>Join the Prespecta photography event.</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}

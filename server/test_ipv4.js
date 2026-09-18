@@ -1,0 +1,1 @@
+const nodemailer = require('nodemailer'); console.log(nodemailer.createTransport({host: 'smtp.gmail.com', port: 465, secure: true, family: 4, auth: {user: 'filmandphotographyclubau@gmail.com', pass: 'qobyaontqzfgiboq'}}).options)
