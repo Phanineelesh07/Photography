@@ -117,20 +117,31 @@ const Home = () => {
         {/* Modern Scroll Indicator */}
         <motion.div 
           className="mouse-indicator-container"
-          initial={{ opacity: 0, x: "-50%", y: 20 }}
-          animate={{ opacity: 1, x: "-50%", y: [0, 8, 0] }}
-          transition={{ opacity: { duration: 1, delay: 1.2 }, y: { repeat: Infinity, duration: 2.5, ease: "easeInOut" } }}
+          initial={{ opacity: 0, x: "-50%", y: 50, scale: 0.5 }}
+          animate={{ opacity: 1, x: "-50%", y: [0, 15, 0], scale: 1 }}
+          transition={{ 
+            opacity: { duration: 0.8, delay: 1.2 }, 
+            scale: { type: "spring", bounce: 0.7, delay: 1.2 }, 
+            y: { repeat: Infinity, duration: 1.2, ease: "easeInOut" } 
+          }}
           onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-          style={{ cursor: "pointer", paddingBottom: "20px" }}
+          style={{ cursor: "pointer", paddingBottom: "30px", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}
         >
-          <span style={{ 
-            fontFamily: "system-ui, -apple-system, sans-serif", 
-            fontSize: "0.85rem", 
-            letterSpacing: "3px", 
-            textTransform: "uppercase", 
-            color: "rgba(255,255,255,0.8)",
-            fontWeight: 400 
-          }}>Scroll down to explore</span>
+          <div style={{
+            background: "rgba(0, 0, 0, 0.7)",
+            color: "white",
+            padding: "10px 20px",
+            borderRadius: "30px",
+            fontWeight: "800",
+            letterSpacing: "1.5px",
+            fontSize: "0.9rem",
+            textTransform: "uppercase",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+            border: "2px solid rgba(255,255,255,0.3)",
+            backdropFilter: "blur(5px)"
+          }}>
+            👇 Scroll down to explore
+          </div>
         </motion.div>
       </section>
 
