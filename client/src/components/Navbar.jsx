@@ -34,7 +34,7 @@ const Navbar = () => {
       <div className="container nav-container">
         <Link to="/" className="nav-logo" onClick={() => { window.scrollTo(0, 0); closeMenu(); }}>
           <Camera size={28} />
-          <span>P R E S P E C T A</span>
+          <span>P E R S P E C T A</span>
         </Link>
 
         <div className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

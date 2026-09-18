@@ -13,7 +13,7 @@ const updateAdmin = async () => {
     
     const result = await User.updateOne(
       { rollNumber: 'ADMIN001' },
-      { $set: { email: 'admin@prespecta.com', password: hashedPassword } }
+      { $set: { email: 'admin@perspecta.com', password: hashedPassword } }
     );
     
     console.log('Admin updated:', result);

@@ -89,11 +89,11 @@ const Home = () => {
                 fontWeight: '500', 
                 textTransform: 'none', 
                 color: '#e6c193', /* Brighter color for visibility */
-                fontSize: '1.3em', /* Make Prespecta larger */
+                fontSize: '1.3em', /* Make Perspecta larger */
                 display: 'inline-block',
                 marginTop: '10px',
                 textShadow: '0 4px 15px rgba(0,0,0,0.5)' /* Add glow/shadow for contrast */
-              }}>Prespecta.</span>
+              }}>Perspecta.</span>
             </h1>
             <p className="hero-tagline" style={{fontWeight: '500', letterSpacing: '1px', fontSize: '1.15rem', marginTop: '10px'}}>
               EXPLORE. OBSERVE. CAPTURE OUR CAMPUS BEAUTIFULLY.
@@ -154,7 +154,7 @@ const Home = () => {
           >
             <h2>About the Event</h2>
             <p>
-             Prespecta is a photography contest designed for college students who have a passion for visual storytelling. Whether you capture the beauty of nature & greenery, reflections & perspectives, creative campus views, or everyday objects turned into extraordinary frames, this platform is yours.
+             Perspecta is a photography contest designed for college students who have a passion for visual storytelling. Whether you capture the beauty of nature & greenery, reflections & perspectives, creative campus views, or everyday objects turned into extraordinary frames, this platform is yours.
             </p>
             <div className="process-box">
               <h3 className="process-heading">
@@ -381,7 +381,7 @@ const Home = () => {
               <div style={{ display: 'flex', gap: '15px', marginTop: '20px', flexWrap: 'wrap', fontWeight: '600', color: 'var(--color-text-secondary)', letterSpacing: '1px', fontSize: '0.8rem' }}>
                 <span>BE CREATIVE</span>
                 <span>|</span>
-                <span>BE PRESPECTAD</span>
+                <span>BE PERSPECTAD</span>
                 <span>|</span>
                 <span>BE YOU</span>
               </div>

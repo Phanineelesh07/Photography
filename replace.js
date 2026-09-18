@@ -15,9 +15,9 @@ function replaceInDir(dir) {
                 let content = fs.readFileSync(fullPath, 'utf8');
                 if (content.includes('Obscura') || content.includes('obscura')) {
                     const original = content;
-                    content = content.replace(/Obscura/g, 'Prespecta');
-                    content = content.replace(/obscura/g, 'prespecta');
-                    content = content.replace(/OBSCURA/g, 'PRESPECTA');
+                    content = content.replace(/Obscura/g, 'Perspecta');
+                    content = content.replace(/obscura/g, 'perspecta');
+                    content = content.replace(/OBSCURA/g, 'PERSPECTA');
                     if (content !== original) {
                         fs.writeFileSync(fullPath, content, 'utf8');
                         console.log('Updated', fullPath);

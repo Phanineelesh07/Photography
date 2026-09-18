@@ -11,7 +11,7 @@ const sendEmail = async (options) => {
   });
 
   const message = {
-    from: `${process.env.FROM_NAME || 'Prespecta Event Team'} <${process.env.EMAIL_USER}>`,
+    from: `${process.env.FROM_NAME || 'Perspecta Event Team'} <${process.env.EMAIL_USER}>`,
     to: options.email,
     subject: options.subject,
     text: options.message,

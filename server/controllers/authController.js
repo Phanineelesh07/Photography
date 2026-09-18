@@ -23,7 +23,7 @@ const sendOtp = async (req, res) => {
     return res.status(400).json({ message: 'Email is required' });
   }
   
-  if (email.toLowerCase() !== 'admin@prespecta.com') {
+  if (email.toLowerCase() !== 'admin@perspecta.com') {
     const allowedDomains = ['@adityauniversity.in', '@aditya.ac.in'];
     const isAllowed = allowedDomains.some(domain => email.toLowerCase().endsWith(domain));
     if (!isAllowed) {
@@ -54,14 +54,14 @@ const sendOtp = async (req, res) => {
       },
       body: JSON.stringify({
         sender: {
-          name: "Prespecta Registration",
+          name: "Perspecta Registration",
           email: "filmandphotographyclubau@gmail.com"
         },
         to: [
           { email: email }
         ],
-        subject: "Your Registration OTP - Prespecta Event",
-        htmlContent: `<html><body><p>Your OTP for Prespecta Event Registration is: <strong>${otp}</strong>.</p><p>It is valid for 10 minutes.</p></body></html>`
+        subject: "Your Registration OTP - Perspecta Event",
+        htmlContent: `<html><body><p>Your OTP for Perspecta Event Registration is: <strong>${otp}</strong>.</p><p>It is valid for 10 minutes.</p></body></html>`
       })
     });
 
@@ -110,7 +110,7 @@ const registerUser = async (req, res) => {
 
     // Assign role
     let role = userType === 'viewer' ? 'viewer' : 'participant';
-    if (email.toLowerCase() === 'admin@prespecta.com') role = 'admin';
+    if (email.toLowerCase() === 'admin@perspecta.com') role = 'admin';
 
     // Create user
     const user = await User.create({
