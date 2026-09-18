@@ -282,8 +282,9 @@ const Home = () => {
             className="cta-container"
             variants={scaleUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
           >
-            <h2 className="cta-title">Ready to tell your story? <br/><span className="cta-highlight">Join the club</span> and become a member.</h2>
-            <p className="cta-subtitle">Registrations will be announced soon. Stay tuned!</p>
+            <h2 className="cta-title">Explore the <br/><span className="cta-highlight">Film and Photography Club</span></h2>
+            <p className="cta-subtitle" style={{marginBottom: "25px"}}>Discover more about our club, upcoming events, and membership details!</p>
+            <a href="https://filmandphotographyclub-au.onrender.com/" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', padding: '12px 30px', backgroundColor: '#111', color: '#fff', borderRadius: '30px', textDecoration: 'none', fontWeight: '600', fontSize: '1.1rem', transition: 'all 0.3s ease', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>Go to Club Details</a>
           </motion.div>
         </div>
       </section>
